@@ -1,0 +1,12 @@
+name: PY_Web_Dev
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python
+  - django
+  - djangorestframework
+  - djangorestframework-jsonapi
+  - celery
+  - django-celery-beat
+  - django-celery-results
