@@ -12,7 +12,7 @@ venv/
 # Conda environment
 .env/
 *.env
-*.yml
+#*.yml
 
 # Docker / Jenkins
 django-Docker/jenkins_home/
