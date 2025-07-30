@@ -20,9 +20,18 @@ pipeline {
         stage('Build Image') {
             steps {
                 dir('django-Docker') {
-                    sh 'docker build -t my-django-app .'
+                    sh 'docker build -t my-django-app:${BUILD_NUMBER} .'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build successful!'
+        }
+        failure {
+            echo '❌ Build failed!'
         }
     }
 }
