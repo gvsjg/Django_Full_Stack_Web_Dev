@@ -16,6 +16,7 @@ venv/
 
 # Docker / Jenkins
 django-Docker/jenkins_home/
+jenkins_home/
 *.log
 
 # VS Code, OS stuff
