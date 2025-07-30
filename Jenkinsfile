@@ -10,14 +10,18 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'echo Running tests...'
-                sh 'docker-compose run --rm web python manage.py test'
+                dir('django-Docker') {
+                    sh 'echo Running tests...'
+                    sh 'docker-compose run --rm web python manage.py test'
+                }
             }
         }
 
         stage('Build Image') {
             steps {
-                sh 'docker-compose build'
+                dir('django-Docker') {
+                    sh 'docker build -t my-django-app .'
+                }
             }
         }
     }
