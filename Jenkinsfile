@@ -1,37 +1,42 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = 'gvsjg/Django_Full_Stack_Web_Dev'
+        // DOCKER_HOST, DOCKER_TLS_VERIFY, DOCKER_CERT_PATH are removed here
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch:'main', url: 'https://github.com/gvsjg/Django_Full_Stack_Web_Dev'
             }
         }
 
-        stage('Test') {
+        stage('Build Docker Image') {
             steps {
-                dir('django-Docker') {
-                    sh 'echo Running tests...'
-                    sh 'docker-compose run --rm web python manage.py test'
-                }
+                sh "docker build -t ${IMAGE_NAME}:latest ."
             }
         }
 
-        stage('Build Image') {
+        stage('Push to DockerHub') {
             steps {
-                dir('django-Docker') {
-                    sh 'docker build -t my-django-app:${BUILD_NUMBER} .'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                    echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
+                    docker push ${IMAGE_NAME}:latest
+                    docker logout
+                    """
                 }
             }
         }
     }
-
     post {
-        success {
-            echo '✅ Build successful!'
-        }
         failure {
             echo '❌ Build failed!'
+        }
+        success {
+            echo '✅ Build successful!'
         }
     }
 }
