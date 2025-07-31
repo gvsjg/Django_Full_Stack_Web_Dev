@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'gvsjg/Django_Full_Stack_Web_Dev'
-        // DOCKER_HOST, DOCKER_TLS_VERIFY, DOCKER_CERT_PATH are removed here
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch:'main', url: 'https://github.com/gvsjg/Django_Full_Stack_Web_Dev'
+                // Change 'main' to 'master' if your repo's primary branch is master
+                git branch:'master', url: 'https://github.com/gvsjg/Django_Full_Stack_Web_Dev'
             }
         }
 
