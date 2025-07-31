@@ -3,28 +3,31 @@ FROM jenkins/jenkins:lts
 USER root
 
 # Install Docker CLI & docker-compose
-# Changed to install docker-ce-cli as recommended, and curl for docker-compose download
-# This is generally more reliable than `docker.io` from apt repos
+# Updated Docker installation steps for better compatibility
 RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
+    apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common lsb-release && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo \
+      "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+      \"$(. /etc/os-release && echo "$VERSION_CODENAME")\" stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && \
+    # Install docker-ce-cli
     apt-get install -y docker-ce-cli && \
+    # Download docker-compose directly as before
     curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Add the jenkins user to the existing 'docker' group (created by docker-ce-cli installation if needed)
-# Or, if the group doesn't exist, this will add it
-# Crucially, we don't assume a GID here, letting the system manage it
+# Add the docker group if it doesn't exist (important!)
+RUN groupadd docker || true
+
+# Add the jenkins user to the docker group
 RUN usermod -aG docker jenkins
 
-# Set permissions for the docker.sock inside the container
-# This is the key change to address the PermissionError on the socket
-# It ensures the 'docker' group (which jenkins user is now part of) has write access
-# to the mounted socket, assuming the host's Docker socket is group-writable.
+# Set permissions for the docker.sock inside the container (important for bind mount)
 RUN chmod 666 /var/run/docker.sock || true
 
 USER jenkins
