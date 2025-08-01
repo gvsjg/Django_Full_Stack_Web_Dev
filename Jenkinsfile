@@ -8,8 +8,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Change 'main' to 'master' if your repo's primary branch is master
                 git branch:'master', url: 'https://github.com/gvsjg/Django_Full_Stack_Web_Dev'
+            }
+        }
+
+        stage('Prepare Docker Socket Permissions') { // <<< THIS STAGE IS CRITICAL NOW
+            steps {
+                // This command will run inside the Jenkins container
+                // It makes the docker.sock globally writable for this pipeline execution
+                sh 'sudo chmod 666 /var/run/docker.sock || true'
             }
         }
 
