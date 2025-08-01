@@ -6,16 +6,19 @@ pipeline {
     }
 
     stages {
+        // REMOVE THIS ENTIRE STAGE!
+        /*
         stage('Checkout') {
             steps {
                 git branch:'master', url: 'https://github.com/gvsjg/Django_Full_Stack_Web_Dev'
             }
         }
+        */
 
-        stage('Prepare Docker Socket Permissions') { // <<< THIS STAGE IS CRITICAL NOW
+        stage('Prepare Docker Socket Permissions') {
             steps {
-                // This command will run inside the Jenkins container
-                // It makes the docker.sock globally writable for this pipeline execution
+                // This command will now execute as root inside the container
+                // and should succeed in setting permissions.
                 sh 'chmod 666 /var/run/docker.sock || true'
             }
         }
