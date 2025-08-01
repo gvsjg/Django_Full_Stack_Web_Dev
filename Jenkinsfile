@@ -25,9 +25,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                // CHANGE THIS LINE: Add the folder path before the dot
+                sh "docker build -t ${IMAGE_NAME}:latest ./django-Docker"
+                // The `./django-Docker` here means:
+                // 1. Set the build context to the 'django-Docker' folder.
+                // 2. Look for a Dockerfile (named 'Dockerfile') inside that context.
             }
         }
+
 
         stage('Push to DockerHub') {
             steps {
