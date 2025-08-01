@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'gvsjg/Django_Full_Stack_Web_Dev'
+        IMAGE_NAME = 'gvsjg/django-full-stack-web-dev'
     }
 
     stages {
