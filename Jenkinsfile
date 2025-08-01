@@ -16,7 +16,7 @@ pipeline {
             steps {
                 // This command will run inside the Jenkins container
                 // It makes the docker.sock globally writable for this pipeline execution
-                sh 'sudo chmod 666 /var/run/docker.sock || true'
+                sh 'chmod 666 /var/run/docker.sock || true'
             }
         }
 
