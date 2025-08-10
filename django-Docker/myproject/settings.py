@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party
+    "rest_framework",
+    "rest_framework_json_api",
+    # Your apps
+    "api", 
 ]
 
 MIDDLEWARE = [
@@ -74,8 +80,14 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        #"ENGINE": "django.db.backends.sqlite3",
+        #"NAME": BASE_DIR / "db.sqlite3",
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DJANGO_DB_NAME', 'mydb'),
+        'USER': os.environ.get('DJANGO_DB_USER', 'myuser'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', 'mypassword'),
+        'HOST': os.environ.get('DJANGO_DB_HOST', 'db'),
+        'PORT': '5432',
     }
 }
 
@@ -122,3 +134,18 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework_json_api.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    ],
+    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework_json_api.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}

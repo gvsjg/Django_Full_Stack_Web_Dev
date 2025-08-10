@@ -8,6 +8,12 @@ services:
       - .:/app
     depends_on:
       - rabbitmq
+      - db
+    environment:
+      - DJANGO_DB_HOST=db
+      - DJANGO_DB_NAME=mydb
+      - DJANGO_DB_USER=myuser
+      - DJANGO_DB_PASSWORD=mypassword
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -23,6 +29,24 @@ services:
       - .:/app
     depends_on:
       - rabbitmq
+      - db
+    environment:
+      - DJANGO_DB_HOST=db
+      - DJANGO_DB_NAME=mydb
+      - DJANGO_DB_USER=myuser
+      - DJANGO_DB_PASSWORD=mypassword
+
+  db:
+    image: postgres:15
+    container_name: django-docker-db
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   jenkins:
     image: jenkins/jenkins:lts
@@ -32,4 +56,7 @@ services:
       - "50000:50000"
     volumes:
       - ./jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock  # So Jenkins can run Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  postgres_data:
