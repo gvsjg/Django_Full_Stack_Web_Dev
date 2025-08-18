@@ -1,7 +1,6 @@
 services:
   web:
-    build:
-      context: .
+    build: .
     ports:
       - "8000:8000"
     volumes:
@@ -10,35 +9,46 @@ services:
       - rabbitmq
       - postgresdb
     environment:
-      - DJANGO_DB_HOST=postgresdb
-      - DJANGO_DB_NAME=mydb
-      - DJANGO_DB_USER=myuser
-      - DJANGO_DB_PASSWORD=mypassword
+      DJANGO_DB_HOST: postgresdb
+      DJANGO_DB_NAME: mydb
+      DJANGO_DB_USER: myuser
+      DJANGO_DB_PASSWORD: mypassword
+      CELERY_BROKER_URL: amqp://guest:guest@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: rpc://
+
+  celery:
+    build: .
+    command: >
+      conda run -n PY_Web_Dev celery -A myproject worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgresdb:
+        condition: service_started
+    environment:
+      DJANGO_DB_HOST: postgresdb
+      DJANGO_DB_NAME: mydb
+      DJANGO_DB_USER: myuser
+      DJANGO_DB_PASSWORD: mypassword
+      CELERY_BROKER_URL: amqp://guest:guest@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: rpc://
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-
-  celery:
-    build:
-      context: .
-    command: conda run -n PY_Web_Dev celery -A api worker --loglevel=info
-    volumes:
-      - .:/app
-    depends_on:
-      - rabbitmq
-      - postgresdb
-    environment:
-      - DJANGO_DB_HOST=postgresdb
-      - DJANGO_DB_NAME=mydb
-      - DJANGO_DB_USER=myuser
-      - DJANGO_DB_PASSWORD=mypassword
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "status"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 20s
 
   postgresdb:
     image: postgres:17
-    container_name: django-docker-postgresdb
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: myuser
@@ -47,6 +57,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
 
   #jenkins:
   #  image: jenkins/jenkins:lts

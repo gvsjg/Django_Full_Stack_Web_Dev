@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_results",
     # Third-party
     "rest_framework",
     "rest_framework_json_api",
@@ -133,7 +134,11 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Celery broker & results
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
+#CELERY_RESULT_BACKEND = 'rpc://'
+# OR if you prefer DB-backed results:
+CELERY_RESULT_BACKEND = "django-db"
 
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
