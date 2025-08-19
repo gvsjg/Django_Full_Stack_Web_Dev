@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import logging.config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_celery_results",
+    "django_celery_beat",
     # Third-party
     "rest_framework",
     "rest_framework_json_api",
@@ -139,6 +141,46 @@ CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
 #CELERY_RESULT_BACKEND = 'rpc://'
 # OR if you prefer DB-backed results:
 CELERY_RESULT_BACKEND = "django-db"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "IST"  # or your timezone
+
+# This is the key line to prevent default logging from overriding your config
+LOGGING_CONFIG = None
+
+import logging.config
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # CRITICAL: Ensures Celery's loggers are not disabled
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {  # The root logger
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery': {  # Explicitly configure the Celery logger
+            'handlers': ['console'],
+            'level': 'INFO',  # Use 'DEBUG' for more detail
+            'propagate': False, # Prevents duplicate logs
+        },
+    },
+}
+
+logging.config.dictConfig(LOGGING)
 
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
