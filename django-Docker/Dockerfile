@@ -10,19 +10,14 @@ SHELL ["conda", "run", "-n", "PY_Web_Dev", "/bin/bash", "-c"]
 # Set working directory
 WORKDIR /app
 
-# Copy all project files into the container
+# Copy all project files into the container (including scripts)
 COPY . .
+
+# Make celery scripts executable
+RUN chmod +x /app/start-celery.sh /app/start-celery-beat.sh
 
 # Expose port for Django
 EXPOSE 8000
 
-# Copy start-celery.sh script and make it executable
-COPY start-celery.sh /app/start-celery.sh
-RUN chmod +x /app/start-celery.sh
-
-COPY start-celery-beat.sh /app/start-celery-beat.sh
-RUN chmod +x /app/start-celery-beat.sh
-
-# Default command for web service (can be overridden in docker-compose)
-# Default command to run Django
+# Default command for web service (overridden in docker-compose)
 CMD ["conda", "run", "-n", "PY_Web_Dev", "python", "manage.py", "runserver", "0.0.0.0:8000"]

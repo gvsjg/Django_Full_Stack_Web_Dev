@@ -5,5 +5,5 @@ set -e
 source /opt/conda/etc/profile.d/conda.sh
 conda activate PY_Web_Dev
 
-# Start Celery Beat (scheduler)
+# Run Celery Beat (with persistent scheduler file inside /app)
 exec celery -A myproject beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
